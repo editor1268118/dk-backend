@@ -34,3 +34,10 @@ Route::get('/run-migration', function () {
     \Artisan::call('migrate', ['--force' => true]);
     return "Migration Done";
 });
+Route::get('/seed-roles', function () {
+    \DB::table('roles')->insert([
+        ['name' => 'user'],
+        ['name' => 'provider']
+    ]);
+    return "Roles inserted";
+});
