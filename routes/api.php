@@ -36,8 +36,14 @@ Route::get('/run-migration', function () {
 });
 Route::get('/seed-roles', function () {
     \DB::table('roles')->insert([
-        ['name' => 'user'],
-        ['name' => 'provider']
+        [
+            'name' => 'user',
+            'slug' => 'user'
+        ],
+        [
+            'name' => 'provider',
+            'slug' => 'provider'
+        ]
     ]);
     return "Roles inserted";
 });
