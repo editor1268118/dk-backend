@@ -30,3 +30,7 @@ Route::get('/check-tables', function () {
         'migrations_table' => \Schema::hasTable('migrations')
     ];
 });
+Route::get('/run-migration', function () {
+    \Artisan::call('migrate', ['--force' => true]);
+    return "Migration Done";
+});
