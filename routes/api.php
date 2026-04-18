@@ -18,6 +18,8 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\UserDashboardController;
 use App\Http\Controllers\Api\ProfessionalController;
 use App\Http\Controllers\Api\ProfessionalServiceController;
+use App\Http\Controllers\Api\ServiceCategoryController;
+use App\Http\Controllers\Api\ProfessionalAvailabilityController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -49,4 +51,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/professional/services/{id}', [ProfessionalServiceController::class, 'show']);
     Route::post('/professional/services/{id}/update', [ProfessionalServiceController::class, 'update']);
     Route::post('/professional/services/{id}/toggle-status', [ProfessionalServiceController::class, 'toggleStatus']);
+
+    // Service Categories
+    Route::get('/service-categories', [ServiceCategoryController::class, 'index']);
+
+    // Professional - Availability Slots
+    Route::get('/professional/availability-slots', [ProfessionalAvailabilityController::class, 'index']);
+    Route::post('/professional/availability-slots', [ProfessionalAvailabilityController::class, 'store']);
+    Route::get('/professional/availability-slots/{id}', [ProfessionalAvailabilityController::class, 'show']);
+    Route::post('/professional/availability-slots/{id}/update', [ProfessionalAvailabilityController::class, 'update']);
+    Route::post('/professional/availability-slots/{id}/toggle-status', [ProfessionalAvailabilityController::class, 'toggleStatus']);
+    Route::delete('/professional/availability-slots/{id}', [ProfessionalAvailabilityController::class, 'destroy']);
 });

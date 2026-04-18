@@ -83,6 +83,11 @@ class User extends Authenticatable
         return $this->hasMany(Donation::class, 'fundraiser_user_id');
     }
 
+    public function serviceAvailabilities()
+    {
+        return $this->hasMany(ServiceAvailability::class, 'provider_user_id');
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *
