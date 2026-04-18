@@ -15,6 +15,9 @@ use Illuminate\Support\Facades\Route;
 */
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\UserDashboardController;
+use App\Http\Controllers\Api\ProfessionalController;
+use App\Http\Controllers\Api\ProfessionalServiceController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -22,28 +25,28 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
-});
 
-Route::get('/check-tables', function () {
-    return [
-        'users_table' => \Schema::hasTable('users'),
-        'migrations_table' => \Schema::hasTable('migrations')
-    ];
-});
-Route::get('/run-migration', function () {
-    \Artisan::call('migrate', ['--force' => true]);
-    return "Migration Done";
-});
-Route::get('/seed-roles', function () {
-    \DB::table('roles')->insert([
-        [
-            'name' => 'user',
-            'slug' => 'user'
-        ],
-        [
-            'name' => 'provider',
-            'slug' => 'provider'
-        ]
-    ]);
-    return "Roles inserted";
+    // User Dashboard - Profile
+    Route::get('/profile', [UserDashboardController::class, 'getProfile']);
+    Route::post('/profile/update', [UserDashboardController::class, 'updateProfile']);
+
+    // User Dashboard - Donations
+    Route::get('/my/donations', [UserDashboardController::class, 'getDonations']);
+    Route::get('/my/donations/summary', [UserDashboardController::class, 'getDonationSummary']);
+
+    // User Dashboard - Bookings
+    Route::get('/my/bookings', [UserDashboardController::class, 'getBookings']);
+    Route::get('/my/bookings/summary', [UserDashboardController::class, 'getBookingSummary']);
+
+    // Professional Registration & Profile
+    Route::post('/register/professional', [ProfessionalController::class, 'registerProfessional']);
+    Route::get('/professional/profile', [ProfessionalController::class, 'getProfile']);
+    Route::post('/professional/profile/update', [ProfessionalController::class, 'updateProfile']);
+
+    // Professional - My Services
+    Route::get('/professional/services', [ProfessionalServiceController::class, 'index']);
+    Route::post('/professional/services', [ProfessionalServiceController::class, 'store']);
+    Route::get('/professional/services/{id}', [ProfessionalServiceController::class, 'show']);
+    Route::post('/professional/services/{id}/update', [ProfessionalServiceController::class, 'update']);
+    Route::post('/professional/services/{id}/toggle-status', [ProfessionalServiceController::class, 'toggleStatus']);
 });

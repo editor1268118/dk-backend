@@ -27,50 +27,19 @@ class AuthController extends Controller
                 'phone' => $request->phone,
             ]);
 
-            // 2. Assign Roles
-            $roles = Role::whereIn('slug', $request->roles)->get();
-            $user->roles()->attach($roles->pluck('id'));
-
-            // 3. Create UserProfile (Base)
-            $user->userProfile()->create($request->only([
-                'first_name',
-                'last_name',
-                'gender',
-                'date_of_birth',
-                'address_line_1',
-                'address_line_2',
-                'city',
-                'state',
-                'country',
-                'postal_code'
-            ]));
-
-            // 4. Conditionally create ProviderProfile
-            if ($user->hasRole('provider')) {
-                $user->providerProfile()->create($request->only([
-                    'business_name',
-                    'professional_title',
-                    'category',
-                    'bio',
-                    'experience_years'
-                ]));
+            // 2. Assign 'user' Role
+            $role = Role::where('slug', 'user')->first();
+            if ($role) {
+                $user->roles()->attach($role->id);
             }
 
-            // 5. Conditionally create FundraiserProfile
-            if ($user->hasAnyRole(['fundraiser', 'institution'])) {
-                $user->fundraiserProfile()->create($request->only([
-                    'fundraiser_type',
-                    'organization_name',
-                    'registration_number',
-                    'cause_title',
-                    'cause_description'
-                ]));
-            }
+            // 3. Create blank UserProfile
+            $user->userProfile()->create([]);
 
             DB::commit();
 
             // Load relations and create token
-            $user->load(['roles', 'userProfile', 'providerProfile', 'fundraiserProfile']);
+            $user->load(['roles', 'userProfile']);
             $token = $user->createToken('auth_token')->plainTextToken;
 
             return response()->json([
