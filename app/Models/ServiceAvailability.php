@@ -35,4 +35,12 @@ class ServiceAvailability extends Model
     {
         return $this->belongsTo(User::class, 'provider_user_id');
     }
+
+    /**
+     * Get the bookings for the availability slot.
+     */
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
+    }
 }

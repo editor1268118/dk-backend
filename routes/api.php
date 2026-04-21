@@ -20,13 +20,29 @@ use App\Http\Controllers\Api\ProfessionalController;
 use App\Http\Controllers\Api\ProfessionalServiceController;
 use App\Http\Controllers\Api\ServiceCategoryController;
 use App\Http\Controllers\Api\ProfessionalAvailabilityController;
+use App\Http\Controllers\Api\ProfessionalBookingController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
+use App\Http\Controllers\Api\PasswordResetController;
+use App\Http\Controllers\Api\PublicServiceController;
+use App\Http\Controllers\Api\BookingController;
+
+Route::post('/forgot-password', [PasswordResetController::class, 'forgotPassword']);
+Route::post('/reset-password', [PasswordResetController::class, 'resetPassword']);
+
+// Public Service Endpoints
+Route::get('/services', [PublicServiceController::class, 'index']);
+Route::get('/services/{id}', [PublicServiceController::class, 'show']);
+Route::get('/services/{id}/available-slots', [PublicServiceController::class, 'getAvailableSlots']);
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
+    
+    // Bookings
+    Route::post('/bookings', [BookingController::class, 'store']);
 
     // User Dashboard - Profile
     Route::get('/profile', [UserDashboardController::class, 'getProfile']);
@@ -44,6 +60,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/register/professional', [ProfessionalController::class, 'registerProfessional']);
     Route::get('/professional/profile', [ProfessionalController::class, 'getProfile']);
     Route::post('/professional/profile/update', [ProfessionalController::class, 'updateProfile']);
+
+    // Professional - Bookings
+    Route::get('/professional/bookings', [ProfessionalBookingController::class, 'index']);
+    Route::get('/professional/bookings/summary', [ProfessionalBookingController::class, 'summary']);
 
     // Professional - My Services
     Route::get('/professional/services', [ProfessionalServiceController::class, 'index']);

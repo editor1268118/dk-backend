@@ -13,6 +13,7 @@ class Booking extends Model
         'user_id',
         'service_id',
         'provider_user_id',
+        'service_availability_id',
         'booking_date',
         'booking_time',
         'status',
@@ -33,5 +34,10 @@ class Booking extends Model
     public function provider()
     {
         return $this->belongsTo(User::class, 'provider_user_id');
+    }
+
+    public function serviceAvailability()
+    {
+        return $this->belongsTo(ServiceAvailability::class);
     }
 }

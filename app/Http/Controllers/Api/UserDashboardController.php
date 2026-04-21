@@ -90,7 +90,8 @@ class UserDashboardController extends Controller
             ->with([
                 'service:id,title,slug,short_description,price,service_category_id',
                 'service.category:id,name,slug', // Adjust basic info as per model fields
-                'provider:id,name,email'
+                'provider:id,name,email',
+                'serviceAvailability'
             ])
             ->orderBy('booking_date', 'desc')
             ->orderBy('booking_time', 'desc')

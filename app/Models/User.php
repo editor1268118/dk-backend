@@ -106,4 +106,9 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function bookingsReceived()
+    {
+        return $this->hasMany(Booking::class, 'provider_user_id');
+    }
 }
