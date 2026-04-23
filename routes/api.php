@@ -20,9 +20,19 @@ use App\Http\Controllers\Api\ProfessionalController;
 use App\Http\Controllers\Api\ProfessionalServiceController;
 use App\Http\Controllers\Api\ServiceCategoryController;
 use App\Http\Controllers\Api\ProfessionalAvailabilityController;
+use App\Http\Controllers\Api\BookingController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+
+// Password Reset (public)
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+
+// Public Service Routes (no auth required)
+Route::get('/services', [ProfessionalServiceController::class, 'publicIndex']);
+Route::get('/services/{id}', [ProfessionalServiceController::class, 'publicShow']);
+Route::get('/services/{id}/available-slots', [ProfessionalAvailabilityController::class, 'publicSlots']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -39,6 +49,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // User Dashboard - Bookings
     Route::get('/my/bookings', [UserDashboardController::class, 'getBookings']);
     Route::get('/my/bookings/summary', [UserDashboardController::class, 'getBookingSummary']);
+    Route::post('/bookings', [BookingController::class, 'store']);
+
+    // Professional - Bookings Received
+    Route::get('/professional/bookings', [BookingController::class, 'professionalBookings']);
 
     // Professional Registration & Profile
     Route::post('/register/professional', [ProfessionalController::class, 'registerProfessional']);
