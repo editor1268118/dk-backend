@@ -176,4 +176,39 @@ class ProfessionalAvailabilityController extends Controller
             'message' => 'Availability slot deleted successfully.',
         ], 200);
     }
+
+    /**
+     * Public: list available (unbooked) slots for a given service (no auth required).
+     */
+    public function publicSlots($id)
+    {
+        $service = \App\Models\Service::where('is_active', true)->find($id);
+
+        if (!$service) {
+            return response()->json(['message' => 'Service not found.'], 404);
+        }
+
+        $today = now()->toDateString();
+        $currentTime = now()->toTimeString();
+
+        $slots = ServiceAvailability::where('service_id', $id)
+            ->where('is_available', true)
+            ->where(function ($query) use ($today, $currentTime) {
+                $query->where('available_date', '>', $today)
+                      ->orWhere(function ($q) use ($today, $currentTime) {
+                          $q->where('available_date', $today)
+                            ->where('start_time', '>', $currentTime);
+                      });
+            })
+            ->whereDoesntHave('bookings', function ($q) {
+                $q->where('status', '!=', 'cancelled');
+            })
+            ->orderBy('available_date', 'asc')
+            ->orderBy('start_time', 'asc')
+            ->get();
+
+        return response()->json([
+            'slots' => $slots,
+        ], 200);
+    }
 }

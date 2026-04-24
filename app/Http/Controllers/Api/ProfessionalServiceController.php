@@ -152,6 +152,45 @@ class ProfessionalServiceController extends Controller
     }
 
     /**
+     * List all active services publicly (no auth required).
+     */
+    public function publicIndex()
+    {
+        $services = Service::with([
+                'category:id,name,slug',
+                'provider:id,name',
+            ])
+            ->where('is_active', true)
+            ->latest()
+            ->get();
+
+        return response()->json([
+            'services' => $services,
+        ], 200);
+    }
+
+    /**
+     * View a single active service publicly (no auth required).
+     */
+    public function publicShow($id)
+    {
+        $service = Service::with([
+                'category:id,name,slug',
+                'provider:id,name',
+            ])
+            ->where('is_active', true)
+            ->find($id);
+
+        if (!$service) {
+            return response()->json(['message' => 'Service not found.'], 404);
+        }
+
+        return response()->json([
+            'service' => $service,
+        ], 200);
+    }
+
+    /**
      * Toggle the active status of a service.
      */
     public function toggleStatus(Request $request, $id)
