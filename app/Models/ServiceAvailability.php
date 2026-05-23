@@ -5,6 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @deprecated Old provider availability slots model. Deprecated under new booking flow.
+ *
+ * Under the new flow, vendors do NOT create availability slots.
+ * This model and its underlying table are kept for backward compatibility.
+ * Do NOT use for new features.
+ */
 class ServiceAvailability extends Model
 {
     use HasFactory;

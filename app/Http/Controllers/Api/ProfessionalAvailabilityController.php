@@ -89,6 +89,73 @@ class ProfessionalAvailabilityController extends Controller
     }
 
     /**
+     * Bulk-create availability slots.
+     * Expects: { "slots": [ { service_id, available_date, start_time, end_time, max_bookings, notes }, ... ] }
+     */
+    public function bulkStore(Request $request)
+    {
+        $user = $request->user();
+        if (!$user->hasRole('provider')) {
+            return response()->json(['message' => 'Forbidden. You are not registered as a professional provider.'], 403);
+        }
+
+        $request->validate([
+            'slots'                    => 'required|array|min:1',
+            'slots.*.service_id'       => 'required|integer|exists:services,id',
+            'slots.*.available_date'   => 'required|date',
+            'slots.*.start_time'       => 'required|date_format:H:i,H:i:s',
+            'slots.*.end_time'         => 'required|date_format:H:i,H:i:s|after:slots.*.start_time',
+            'slots.*.max_bookings'     => 'nullable|integer|min:1',
+            'slots.*.notes'            => 'nullable|string|max:500',
+            'slots.*.is_available'     => 'nullable|boolean',
+        ]);
+
+        $created  = [];
+        $skipped  = [];
+
+        foreach ($request->slots as $index => $slotData) {
+            // Verify the professional owns the service
+            $service = Service::where('provider_user_id', $user->id)->find($slotData['service_id']);
+            if (!$service) {
+                $skipped[] = array_merge($slotData, ['reason' => 'Service not found or access denied.']);
+                continue;
+            }
+
+            // Skip duplicates
+            $exists = ServiceAvailability::where('service_id', $slotData['service_id'])
+                ->where('available_date', $slotData['available_date'])
+                ->where('start_time', $slotData['start_time'])
+                ->where('end_time', $slotData['end_time'])
+                ->exists();
+
+            if ($exists) {
+                $skipped[] = array_merge($slotData, ['reason' => 'Duplicate slot.']);
+                continue;
+            }
+
+            $slot = ServiceAvailability::create([
+                'service_id'       => $slotData['service_id'],
+                'provider_user_id' => $user->id,
+                'available_date'   => $slotData['available_date'],
+                'start_time'       => $slotData['start_time'],
+                'end_time'         => $slotData['end_time'],
+                'max_bookings'     => $slotData['max_bookings'] ?? 1,
+                'is_available'     => $slotData['is_available'] ?? true,
+                'notes'            => $slotData['notes'] ?? null,
+            ]);
+
+            $slot->load('service:id,title,slug');
+            $created[] = $slot;
+        }
+
+        return response()->json([
+            'message' => count($created) . ' slot(s) created successfully.',
+            'created' => $created,
+            'skipped' => $skipped,
+        ], 201);
+    }
+
+    /**
      * View a specific availability slot.
      */
     public function show(Request $request, $id)

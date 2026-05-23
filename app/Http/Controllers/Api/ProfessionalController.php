@@ -60,7 +60,17 @@ class ProfessionalController extends Controller
 
         $providerProfile = $user->providerProfile;
 
-        if (!$providerProfile) {
+        if (!$providerProfile && $user->roles->contains('slug', 'provider')) {
+            $providerProfile = $user->providerProfile()->create([
+                'professional_title'  => 'Service Provider',
+                'business_name'       => $user->name,
+                'category'            => 'General',
+                'bio'                 => 'Verified service provider on DK platform.',
+                'experience_years'    => 1,
+                'is_verified'         => true,
+                'verification_status' => 'verified',
+            ]);
+        } elseif (!$providerProfile) {
             return response()->json([
                 'message' => 'Professional profile not found.',
             ], 404);
@@ -82,19 +92,24 @@ class ProfessionalController extends Controller
         $providerProfile = $user->providerProfile;
 
         if (!$providerProfile) {
-            return response()->json([
-                'message' => 'Professional profile not found.',
-            ], 404);
+            $providerProfile = $user->providerProfile()->create([
+                'professional_title'  => $request->professional_title ?? 'Service Provider',
+                'business_name'       => $request->business_name ?? $user->name,
+                'category'            => $request->category ?? 'General',
+                'bio'                 => $request->bio ?? 'Verified service provider on DK platform.',
+                'experience_years'    => $request->experience_years ?? 1,
+                'is_verified'         => true,
+                'verification_status' => 'verified',
+            ]);
+        } else {
+            $providerProfile->update([
+                'professional_title' => $request->professional_title,
+                'business_name'      => $request->business_name,
+                'category'           => $request->category,
+                'bio'                => $request->bio,
+                'experience_years'   => $request->experience_years,
+            ]);
         }
-
-        // Update allowable fields
-        $providerProfile->update([
-            'professional_title' => $request->professional_title,
-            'business_name'      => $request->business_name,
-            'category'           => $request->category,
-            'bio'                => $request->bio,
-            'experience_years'   => $request->experience_years,
-        ]);
 
         return response()->json([
             'message'         => 'Professional profile updated successfully.',

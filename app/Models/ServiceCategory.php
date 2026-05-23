@@ -16,8 +16,19 @@ class ServiceCategory extends Model
         'is_active',
     ];
 
+    /**
+     * @deprecated Old provider-created services. Deprecated under new flow.
+     */
     public function services()
     {
         return $this->hasMany(Service::class);
+    }
+
+    /**
+     * Get all platform services under this category.
+     */
+    public function platformServices()
+    {
+        return $this->hasMany(PlatformService::class);
     }
 }

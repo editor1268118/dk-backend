@@ -31,7 +31,19 @@ class ServiceCategorySeeder extends Seeder
             [
                 'name' => 'Counselling',
                 'description' => 'Professional personal, mental, or relationship Islamic counselling.',
-            ]
+            ],
+            [
+                'name' => 'Hijama',
+                'description' => 'Professional cupping therapy services following Islamic tradition.',
+            ],
+            [
+                'name' => 'Waqf Management',
+                'description' => 'Islamic endowment management and advisory services.',
+            ],
+            [
+                'name' => 'Fair Division',
+                'description' => 'Islamic inheritance and fair division advisory services.',
+            ],
         ];
 
         foreach ($categories as $category) {
