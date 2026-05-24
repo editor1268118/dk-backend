@@ -4,8 +4,8 @@ WORKDIR /var/www
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    git unzip curl libzip-dev zip libpq-dev \
-    && docker-php-ext-install zip pdo pdo_pgsql pgsql
+    git unzip curl libzip-dev zip \
+    && docker-php-ext-install zip pdo pdo_mysql
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
