@@ -23,7 +23,7 @@ class AdminUserSeeder extends Seeder
             ['email' => $adminEmail],
             [
                 'name' => 'Super Admin',
-                'password' => Hash::make('admin123456'),
+                'password' => Hash::make('Azhar@77'),
                 'phone' => '0000000000',
                 'status' => 'active',
             ]
@@ -40,6 +40,6 @@ class AdminUserSeeder extends Seeder
             $admin->userProfile()->create([]);
         }
 
-        $this->command->info("Admin user created/exists: {$adminEmail} / admin123456");
+        $this->command->info("Admin user created/exists: {$adminEmail} / Azhar@77");
     }
 }
