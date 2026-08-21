@@ -18,6 +18,7 @@ class PlatformService extends Model
         'vendor_payout_percentage',
         'platform_percentage',
         'is_active',
+        'requires_start_otp',
     ];
 
     protected $casts = [
@@ -25,6 +26,7 @@ class PlatformService extends Model
         'vendor_payout_percentage' => 'decimal:2',
         'platform_percentage' => 'decimal:2',
         'is_active' => 'boolean',
+        'requires_start_otp' => 'boolean',
     ];
 
     /**

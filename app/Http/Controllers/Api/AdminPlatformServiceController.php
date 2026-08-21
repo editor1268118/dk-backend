@@ -74,6 +74,7 @@ class AdminPlatformServiceController extends Controller
             'vendor_payout_percentage' => 'required|numeric|min:0|max:100',
             'platform_percentage'    => 'nullable|numeric|min:0|max:100',
             'is_active'              => 'nullable|boolean',
+            'requires_start_otp'     => 'nullable|boolean',
         ]);
 
         // Auto-calculate platform_percentage if not provided
@@ -83,6 +84,7 @@ class AdminPlatformServiceController extends Controller
 
         $validated['slug'] = $this->generateUniqueSlug($validated['name']);
         $validated['is_active'] = $validated['is_active'] ?? true;
+        $validated['requires_start_otp'] = $validated['requires_start_otp'] ?? true;
 
         $service = PlatformService::create($validated);
         $service->load('category:id,name,slug');
@@ -132,6 +134,7 @@ class AdminPlatformServiceController extends Controller
             'vendor_payout_percentage' => 'required|numeric|min:0|max:100',
             'platform_percentage'    => 'nullable|numeric|min:0|max:100',
             'is_active'              => 'nullable|boolean',
+            'requires_start_otp'     => 'nullable|boolean',
         ]);
 
         // Auto-calculate platform_percentage if not provided

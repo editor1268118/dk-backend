@@ -25,6 +25,9 @@ class User extends Authenticatable
         'password',
         'phone',
         'status',
+        'is_blocked',
+        'blocked_at',
+        'blocked_reason',
     ];
 
     public function roles()
@@ -165,11 +168,29 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'is_blocked' => 'boolean',
+        'blocked_at' => 'datetime',
     ];
 
     public function bookingsReceived()
     {
         return $this->hasMany(Booking::class, 'provider_user_id');
+    }
+
+    /**
+     * Get the user's active shopping cart.
+     */
+    public function activeCart()
+    {
+        return $this->hasOne(Cart::class)->where('status', 'active');
+    }
+
+    /**
+     * Get the user's shop orders.
+     */
+    public function shopOrders()
+    {
+        return $this->hasMany(ShopOrder::class);
     }
 
     public function professionalWallet()
@@ -180,5 +201,29 @@ class User extends Authenticatable
     public function professionalWalletTransactions()
     {
         return $this->hasMany(ProfessionalWalletTransaction::class, 'provider_user_id');
+    }
+
+    /**
+     * Get the user's coupon usages.
+     */
+    public function couponUsages()
+    {
+        return $this->hasMany(CouponUsage::class);
+    }
+
+    /**
+     * Get the user's product reviews.
+     */
+    public function productReviews()
+    {
+        return $this->hasMany(ProductReview::class);
+    }
+
+    /**
+     * Get the user's in-app notifications (Phase 11).
+     */
+    public function inAppNotifications()
+    {
+        return $this->hasMany(\App\Models\Notification::class);
     }
 }

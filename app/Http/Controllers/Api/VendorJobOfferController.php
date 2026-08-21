@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\BookingVendorOffer;
+use App\Models\Notification;
 use App\Models\ServiceBooking;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -211,6 +213,35 @@ class VendorJobOfferController extends Controller
 
             $booking = $result['booking'];
             $booking->load(['platformService.category']);
+
+            // Phase 11: Notify customer + admins that vendor accepted
+            try {
+                $notificationService = app(NotificationService::class);
+                $notifOptions = [
+                    'entity_type' => 'service_booking',
+                    'entity_id'   => $booking->id,
+                    'data'        => ['booking_reference' => $booking->booking_reference, 'provider_name' => $user->name],
+                ];
+
+                // Notify customer
+                $notificationService->notifyUser(
+                    $booking->user_id,
+                    'Professional accepted your booking',
+                    "A professional has accepted your service booking #{$booking->booking_reference}.",
+                    Notification::TYPE_SERVICE_VENDOR_ACCEPTED,
+                    array_merge($notifOptions, ['action_url' => '/dashboard?tab=service-booked'])
+                );
+
+                // Notify admins
+                $notificationService->notifyAdmins(
+                    'Service booking accepted by professional',
+                    "Booking #{$booking->booking_reference} has been accepted by {$user->name}.",
+                    Notification::TYPE_SERVICE_VENDOR_ACCEPTED,
+                    array_merge($notifOptions, ['action_url' => '/admin/control-panel?section=bookings'])
+                );
+            } catch (\Exception $e) {
+                // Never fail core action
+            }
 
             return response()->json([
                 'message' => 'Job offer accepted successfully. You are now assigned to this booking.',

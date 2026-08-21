@@ -16,6 +16,10 @@ class ServiceCategory extends Model
         'is_active',
     ];
 
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
+
     /**
      * @deprecated Old provider-created services. Deprecated under new flow.
      */

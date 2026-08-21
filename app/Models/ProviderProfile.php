@@ -18,6 +18,15 @@ class ProviderProfile extends Model
         'experience_years',
         'is_verified',
         'verification_status',
+        'is_suspended',
+        'suspended_at',
+        'suspension_reason',
+    ];
+
+    protected $casts = [
+        'is_verified' => 'boolean',
+        'is_suspended' => 'boolean',
+        'suspended_at' => 'datetime',
     ];
 
     public function user()

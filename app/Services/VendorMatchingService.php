@@ -167,6 +167,7 @@ class VendorMatchingService
     {
         $now = now();
         $offersCreated = 0;
+        $notifiedProviderIds = [];
 
         foreach ($providerIds as $providerId) {
             // Prevent duplicate offers (upsert-safe)
@@ -182,6 +183,31 @@ class VendorMatchingService
                     'sent_at' => $now,
                 ]);
                 $offersCreated++;
+                $notifiedProviderIds[] = $providerId;
+            }
+        }
+
+        // Phase 11: Notify each matched vendor about the new job offer
+        if (!empty($notifiedProviderIds)) {
+            try {
+                $notificationService = app(NotificationService::class);
+                $serviceName = $booking->platformService?->name ?? 'Service';
+                foreach ($notifiedProviderIds as $providerId) {
+                    $notificationService->notifyProvider(
+                        $providerId,
+                        'New job offer',
+                        "You have received a new service job offer for {$serviceName}.",
+                        \App\Models\Notification::TYPE_SERVICE_JOB_OFFER_RECEIVED,
+                        [
+                            'entity_type' => 'service_booking',
+                            'entity_id'   => $booking->id,
+                            'action_url'  => '/dashboard?tab=job-offers',
+                            'data'        => ['booking_reference' => $booking->booking_reference, 'service_name' => $serviceName],
+                        ]
+                    );
+                }
+            } catch (\Exception $e) {
+                // Never fail core action
             }
         }
 
