@@ -230,7 +230,7 @@ class ShopCheckoutController extends Controller
                 'Order placed successfully',
                 "Your order {$order->order_number} has been placed successfully.",
                 \App\Models\Notification::TYPE_SHOP_ORDER_PLACED,
-                array_merge($notifOptions, ['action_url' => '/dashboard?tab=my-orders'])
+                array_merge($notifOptions, ['action_url' => '/dashboard?tab=shopped'])
             );
 
             // Notify admins
@@ -238,7 +238,7 @@ class ShopCheckoutController extends Controller
                 'New shop order received',
                 "A new shop order {$order->order_number} has been placed.",
                 \App\Models\Notification::TYPE_SHOP_ORDER_PLACED,
-                array_merge($notifOptions, ['action_url' => '/admin/control-panel?section=shop-orders'])
+                array_merge($notifOptions, ['action_url' => '/admin/control-panel?section=shop_orders'])
             );
 
             // Low stock alerts for products that dropped below threshold
@@ -254,7 +254,7 @@ class ShopCheckoutController extends Controller
                             'priority'    => \App\Models\Notification::PRIORITY_HIGH,
                             'entity_type' => 'product',
                             'entity_id'   => $product->id,
-                            'action_url'  => '/admin/control-panel?section=inventory',
+                            'action_url'  => '/admin/control-panel?section=shop_inventory',
                             'data'        => ['product_name' => $product->name, 'sku' => $product->sku, 'stock' => $product->stock_quantity],
                         ]
                     );

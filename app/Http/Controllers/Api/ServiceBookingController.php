@@ -102,7 +102,7 @@ class ServiceBookingController extends Controller
                 'Service booking created',
                 "Your service booking #{$booking->booking_reference} for {$serviceName} has been created.",
                 Notification::TYPE_SERVICE_BOOKING_CREATED,
-                array_merge($notifOptions, ['action_url' => '/dashboard?tab=service-booked'])
+                array_merge($notifOptions, ['action_url' => '/dashboard?tab=services'])
             );
 
             // Notify admins
@@ -628,7 +628,7 @@ class ServiceBookingController extends Controller
                         'status'                                => ServiceBooking::STATUS_RESCHEDULE_PENDING_PROVIDER_CONFIRMATION,
                         'previous_assigned_provider_user_id'    => $booking->assigned_provider_user_id,
                         // Keep assigned_provider_user_id intact
-                        'reschedule_reconfirmation_deadline_at' => now()->addMinutes(15),
+                        'reschedule_reconfirmation_deadline_at' => null,
                         'vendor_accepted_at'                    => null,
                         'action_window_ends_at'                 => null,
                         'confirmed_at'                          => null,
@@ -687,7 +687,7 @@ class ServiceBookingController extends Controller
                             'Customer rescheduled booking',
                             "Customer has rescheduled booking #{$booking->booking_reference}. Please accept or reject the new time.",
                             Notification::TYPE_SERVICE_RESCHEDULE_REQUESTED,
-                            array_merge($notifOptions, ['action_url' => '/dashboard?tab=bookings-received'])
+                            array_merge($notifOptions, ['action_url' => '/dashboard?tab=bookings_received'])
                         );
                     }
 
@@ -803,7 +803,7 @@ class ServiceBookingController extends Controller
                     'New service issue reported',
                     "An issue has been reported for booking #{$booking->booking_reference}.",
                     Notification::TYPE_SERVICE_ISSUE_REPORTED,
-                    array_merge($notifOptions, ['action_url' => '/dashboard?tab=bookings-received'])
+                    array_merge($notifOptions, ['action_url' => '/dashboard?tab=bookings_received'])
                 );
             }
         } catch (\Exception $e) {
@@ -824,46 +824,7 @@ class ServiceBookingController extends Controller
      */
     public function expireRescheduleReconfirmations(Request $request)
     {
-        $expiredBookings = ServiceBooking::where('status', ServiceBooking::STATUS_RESCHEDULE_PENDING_PROVIDER_CONFIRMATION)
-            ->where('reschedule_reconfirmation_deadline_at', '<=', now())
-            ->get();
-
-        $processedCount = 0;
-
-        foreach ($expiredBookings as $booking) {
-            DB::transaction(function () use ($booking) {
-                // Expire old offers
-                BookingVendorOffer::where('booking_id', $booking->id)
-                    ->whereIn('status', [
-                        BookingVendorOffer::STATUS_SENT,
-                        BookingVendorOffer::STATUS_ACCEPTED,
-                    ])
-                    ->update([
-                        'status' => BookingVendorOffer::STATUS_EXPIRED,
-                    ]);
-
-                $booking->update([
-                    'status'                    => ServiceBooking::STATUS_BROADCASTED,
-                    'assigned_provider_user_id' => null,
-                    'vendor_accepted_at'        => null,
-                    'action_window_ends_at'     => null,
-                    'confirmed_at'              => null,
-                ]);
-            });
-
-            // Rebroadcast
-            try {
-                $this->vendorMatchingService->broadcastToMatchingVendors($booking->fresh());
-            } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::warning("Failed to rebroadcast expired reconfirmation booking #{$booking->id}: " . $e->getMessage());
-            }
-            
-            $processedCount++;
-        }
-
-        return response()->json([
-            'message' => "Processed {$processedCount} expired reconfirmations.",
-            'count'   => $processedCount
-        ]);
+        // Pending reschedules remain actionable until a professional responds.
+        return response()->json(['message' => 'Reschedule requests do not expire automatically.', 'count' => 0]);
     }
 }

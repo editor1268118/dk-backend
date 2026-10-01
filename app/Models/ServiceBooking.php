@@ -81,6 +81,7 @@ class ServiceBooking extends Model
     ];
 
     protected $casts = [
+        'assigned_provider_user_id' => 'integer',
         'preferred_date' => 'date',
         'customer_price' => 'decimal:2',
         'vendor_payout_percentage' => 'decimal:2',

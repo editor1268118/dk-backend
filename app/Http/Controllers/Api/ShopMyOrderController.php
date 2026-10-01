@@ -272,14 +272,14 @@ class ShopMyOrderController extends Controller
                 'Order cancelled',
                 "Your order {$order->order_number} has been cancelled.",
                 \App\Models\Notification::TYPE_SHOP_ORDER_CANCELLED,
-                array_merge($notifOptions, ['action_url' => '/dashboard?tab=my-orders'])
+                array_merge($notifOptions, ['action_url' => '/dashboard?tab=shopped'])
             );
 
             $notificationService->notifyAdmins(
                 'Shop order cancelled by customer',
                 "Order {$order->order_number} has been cancelled by the customer.",
                 \App\Models\Notification::TYPE_SHOP_ORDER_CANCELLED,
-                array_merge($notifOptions, ['action_url' => '/admin/control-panel?section=shop-orders'])
+                array_merge($notifOptions, ['action_url' => '/admin/control-panel?section=shop_orders'])
             );
         } catch (\Exception $e) {
             // Never fail core action
@@ -418,14 +418,14 @@ class ShopMyOrderController extends Controller
                 'Return request submitted',
                 "Your return request {$returnRequest->return_number} for order {$order->order_number} has been submitted.",
                 \App\Models\Notification::TYPE_SHOP_RETURN_REQUESTED,
-                array_merge($notifOptions, ['action_url' => '/dashboard?tab=my-returns'])
+                array_merge($notifOptions, ['action_url' => '/dashboard?tab=shop_returns'])
             );
 
             $notificationService->notifyAdmins(
                 'New return request',
                 "Return request {$returnRequest->return_number} submitted for order {$order->order_number}.",
                 \App\Models\Notification::TYPE_SHOP_RETURN_REQUESTED,
-                array_merge($notifOptions, ['action_url' => '/admin/control-panel?section=shop-returns'])
+                array_merge($notifOptions, ['action_url' => '/admin/control-panel?section=shop_returns'])
             );
         } catch (\Exception $e) {
             // Never fail core action
@@ -622,7 +622,7 @@ class ShopMyOrderController extends Controller
                 [
                     'entity_type' => 'product_review',
                     'entity_id'   => $review->id,
-                    'action_url'  => '/admin/control-panel?section=product-reviews',
+                    'action_url'  => '/admin/control-panel?section=shop_reviews',
                     'data'        => ['product_name' => $product->name, 'rating' => $validated['rating']],
                 ]
             );

@@ -315,7 +315,7 @@ class AdminShopOrderController extends Controller
             $notifOptions = [
                 'entity_type' => 'shop_order',
                 'entity_id'   => $order->id,
-                'action_url'  => '/dashboard?tab=my-orders',
+                'action_url'  => '/dashboard?tab=shopped',
                 'data'        => ['order_number' => $order->order_number, 'old_status' => $oldStatus, 'new_status' => $newStatus],
             ];
 
@@ -342,7 +342,7 @@ class AdminShopOrderController extends Controller
                     'Shop order cancelled',
                     "Order {$order->order_number} has been cancelled by admin.",
                     \App\Models\Notification::TYPE_SHOP_ORDER_CANCELLED,
-                    array_merge($notifOptions, ['action_url' => '/admin/control-panel?section=shop-orders'])
+                    array_merge($notifOptions, ['action_url' => '/admin/control-panel?section=shop_orders'])
                 );
             } else {
                 $statusLabel = ucfirst(str_replace('_', ' ', $newStatus));

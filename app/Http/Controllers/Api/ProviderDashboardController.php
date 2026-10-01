@@ -110,13 +110,9 @@ class ProviderDashboardController extends Controller
                     'reschedule_reason' => $booking->reschedule_reason,
                     'reschedule_reconfirmation_deadline_at' => $booking->reschedule_reconfirmation_deadline_at,
                     'can_accept_rescheduled_time' => $booking->status === ServiceBooking::STATUS_RESCHEDULE_PENDING_PROVIDER_CONFIRMATION 
-                                                    && $booking->assigned_provider_user_id === $user->id 
-                                                    && $booking->reschedule_reconfirmation_deadline_at 
-                                                    && $now->lte($booking->reschedule_reconfirmation_deadline_at),
+                                                    && $booking->assigned_provider_user_id === $user->id,
                     'can_reject_rescheduled_time' => $booking->status === ServiceBooking::STATUS_RESCHEDULE_PENDING_PROVIDER_CONFIRMATION 
-                                                    && $booking->assigned_provider_user_id === $user->id 
-                                                    && $booking->reschedule_reconfirmation_deadline_at 
-                                                    && $now->lte($booking->reschedule_reconfirmation_deadline_at),
+                                                    && $booking->assigned_provider_user_id === $user->id,
                     'cancellation_reason' => $booking->status === ServiceBooking::STATUS_CANCELLED_BY_USER ? $booking->cancellation_reason : null,
                     'cancelled_by' => $booking->cancelled_by,
                     'issue_status' => $booking->issue_status,
@@ -445,7 +441,7 @@ class ProviderDashboardController extends Controller
                     'Service job started',
                     "Your service job #{$booking->booking_reference} has been started by the professional.",
                     Notification::TYPE_SERVICE_JOB_STARTED,
-                    array_merge($notifOptions, ['action_url' => '/dashboard?tab=service-booked'])
+                    array_merge($notifOptions, ['action_url' => '/dashboard?tab=services'])
                 );
 
                 $notificationService->notifyAdmins(
@@ -603,7 +599,7 @@ class ProviderDashboardController extends Controller
                         'Service completed',
                         "Your service booking #{$booking->booking_reference} has been completed.",
                         Notification::TYPE_SERVICE_JOB_COMPLETED,
-                        array_merge($notifOptions, ['action_url' => '/dashboard?tab=service-booked'])
+                        array_merge($notifOptions, ['action_url' => '/dashboard?tab=services'])
                     );
 
                     // Notify professional — payout released
@@ -660,9 +656,6 @@ class ProviderDashboardController extends Controller
                 if (!$booking) return ['success' => false, 'message' => 'Booking not found.', 'code' => 404];
                 if ($booking->assigned_provider_user_id !== $user->id) return ['success' => false, 'message' => 'Forbidden.', 'code' => 403];
                 if ($booking->status !== ServiceBooking::STATUS_RESCHEDULE_PENDING_PROVIDER_CONFIRMATION) return ['success' => false, 'message' => 'Invalid status.', 'code' => 422];
-                if (!$booking->reschedule_reconfirmation_deadline_at || now()->gt($booking->reschedule_reconfirmation_deadline_at)) {
-                    return ['success' => false, 'message' => 'Confirmation deadline has passed.', 'code' => 422];
-                }
 
                 // If original booking was confirmed before reschedule, go to confirmed. Else vendor_accepted.
                 $newStatus = ServiceBooking::STATUS_VENDOR_ACCEPTED;
@@ -715,7 +708,7 @@ class ProviderDashboardController extends Controller
                     'Professional accepted new time',
                     "The professional has accepted the rescheduled time for booking #{$booking->booking_reference}.",
                     Notification::TYPE_SERVICE_RESCHEDULE_ACCEPTED,
-                    array_merge($notifOptions, ['action_url' => '/dashboard?tab=service-booked'])
+                    array_merge($notifOptions, ['action_url' => '/dashboard?tab=services'])
                 );
 
                 $notificationService->notifyAdmins(
@@ -732,7 +725,7 @@ class ProviderDashboardController extends Controller
                         'Start OTP available',
                         'Your service start OTP is now available. Open booking detail to view it.',
                         Notification::TYPE_SERVICE_OTP_AVAILABLE,
-                        array_merge($notifOptions, ['action_url' => '/dashboard?tab=service-booked'])
+                        array_merge($notifOptions, ['action_url' => '/dashboard?tab=services'])
                     );
                 }
             } catch (\Exception $e) {
@@ -768,9 +761,6 @@ class ProviderDashboardController extends Controller
                 if (!$booking) return ['success' => false, 'message' => 'Booking not found.', 'code' => 404];
                 if ($booking->assigned_provider_user_id !== $user->id) return ['success' => false, 'message' => 'Forbidden.', 'code' => 403];
                 if ($booking->status !== ServiceBooking::STATUS_RESCHEDULE_PENDING_PROVIDER_CONFIRMATION) return ['success' => false, 'message' => 'Invalid status.', 'code' => 422];
-                if (!$booking->reschedule_reconfirmation_deadline_at || now()->gt($booking->reschedule_reconfirmation_deadline_at)) {
-                    return ['success' => false, 'message' => 'Confirmation deadline has passed.', 'code' => 422];
-                }
 
                 // Expire old offers
                 BookingVendorOffer::where('booking_id', $booking->id)
@@ -810,7 +800,7 @@ class ProviderDashboardController extends Controller
                     'Professional rejected new time',
                     "The professional has rejected the rescheduled time for booking #{$booking->booking_reference}. We are searching for another professional.",
                     Notification::TYPE_SERVICE_RESCHEDULE_REJECTED,
-                    array_merge($notifOptions, ['action_url' => '/dashboard?tab=service-booked'])
+                    array_merge($notifOptions, ['action_url' => '/dashboard?tab=services'])
                 );
 
                 $notificationService->notifyAdmins(

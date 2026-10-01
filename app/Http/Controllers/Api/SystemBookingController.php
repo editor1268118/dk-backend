@@ -75,7 +75,7 @@ class SystemBookingController extends Controller
                     'Booking confirmed',
                     "Your booking #{$booking->booking_reference} has been confirmed.",
                     \App\Models\Notification::TYPE_SERVICE_BOOKING_CONFIRMED,
-                    array_merge($notifOptions, ['action_url' => '/dashboard?tab=service-booked'])
+                    array_merge($notifOptions, ['action_url' => '/dashboard?tab=services'])
                 );
 
                 // Notify professional: booking confirmed
@@ -85,7 +85,7 @@ class SystemBookingController extends Controller
                         'Booking confirmed',
                         "Booking #{$booking->booking_reference} has been confirmed. Please be ready for the service.",
                         \App\Models\Notification::TYPE_SERVICE_BOOKING_CONFIRMED,
-                        array_merge($notifOptions, ['action_url' => '/dashboard?tab=bookings-received'])
+                        array_merge($notifOptions, ['action_url' => '/dashboard?tab=bookings_received'])
                     );
                 }
 
@@ -96,7 +96,7 @@ class SystemBookingController extends Controller
                         'Start OTP available',
                         'Your service start OTP is now available. Open booking detail to view it.',
                         \App\Models\Notification::TYPE_SERVICE_OTP_AVAILABLE,
-                        array_merge($notifOptions, ['action_url' => '/dashboard?tab=service-booked'])
+                        array_merge($notifOptions, ['action_url' => '/dashboard?tab=services'])
                     );
                 }
             } catch (\Exception $e) {

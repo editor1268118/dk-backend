@@ -28,26 +28,11 @@ class AutoConfirmBookingsCommand extends Command
      */
     public function handle()
     {
-        $now = now();
-
-        $expiredBookings = ServiceBooking::where('status', ServiceBooking::STATUS_VENDOR_ACCEPTED)
-            ->whereNotNull('assigned_provider_user_id')
-            ->whereNotNull('action_window_ends_at')
-            ->where('action_window_ends_at', '<=', $now)
-            ->get();
-
-        $count = 0;
-        foreach ($expiredBookings as $booking) {
-            $booking->update([
-                'status' => ServiceBooking::STATUS_CONFIRMED,
-                'confirmed_at' => $now,
-            ]);
-            $count++;
-            $this->info("Confirmed booking: {$booking->booking_reference}");
-        }
-
-        $this->info("Auto-confirmation complete. Total confirmed: {$count}");
-
+        // Use the same lifecycle as the API, including OTP generation and notifications.
+        $request = new \Illuminate\Http\Request();
+        $response = app(\App\Http\Controllers\Api\SystemBookingController::class)
+            ->autoConfirmExpiredWindows($request);
+        $this->info($response->getData(true)['message'] ?? 'Expired action windows processed.');
         return Command::SUCCESS;
     }
 }

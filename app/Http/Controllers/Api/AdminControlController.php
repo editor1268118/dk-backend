@@ -2333,48 +2333,8 @@ class AdminControlController extends Controller
      */
     public function expirePendingReschedules(Request $request)
     {
-        $admin = $request->user();
-
-        $expired = ServiceBooking::where('status', ServiceBooking::STATUS_RESCHEDULE_PENDING_PROVIDER_CONFIRMATION)
-            ->where('reschedule_reconfirmation_deadline_at', '<=', now())
-            ->get();
-
-        $count = 0;
-
-        foreach ($expired as $booking) {
-            DB::transaction(function () use ($booking) {
-                BookingVendorOffer::where('booking_id', $booking->id)
-                    ->whereIn('status', [BookingVendorOffer::STATUS_SENT, BookingVendorOffer::STATUS_ACCEPTED])
-                    ->update(['status' => BookingVendorOffer::STATUS_EXPIRED]);
-
-                $booking->update([
-                    'status' => ServiceBooking::STATUS_BROADCASTED,
-                    'assigned_provider_user_id' => null,
-                    'vendor_accepted_at' => null,
-                    'action_window_ends_at' => null,
-                    'confirmed_at' => null,
-                ]);
-            });
-
-            try {
-                $this->vendorMatchingService->broadcastToMatchingVendors($booking->fresh());
-            } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::warning("Admin: rebroadcast failed for booking #{$booking->id}: " . $e->getMessage());
-            }
-
-            $count++;
-        }
-
-        AdminActionLog::record(
-            $admin->id, 'reschedule_expired', 'service_booking', 0,
-            "Admin expired {$count} pending reschedule reconfirmations.",
-            ['count' => $count]
-        );
-
-        return response()->json([
-            'message' => "Expired and rebroadcasted {$count} pending reschedule reconfirmation(s).",
-            'count' => $count,
-        ], 200);
+        // Pending reschedules remain actionable until a professional responds.
+        return response()->json(['message' => 'Reschedule requests do not expire automatically.', 'count' => 0]);
     }
 
     /**

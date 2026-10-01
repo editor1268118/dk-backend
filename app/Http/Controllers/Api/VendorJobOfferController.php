@@ -229,7 +229,7 @@ class VendorJobOfferController extends Controller
                     'Professional accepted your booking',
                     "A professional has accepted your service booking #{$booking->booking_reference}.",
                     Notification::TYPE_SERVICE_VENDOR_ACCEPTED,
-                    array_merge($notifOptions, ['action_url' => '/dashboard?tab=service-booked'])
+                    array_merge($notifOptions, ['action_url' => '/dashboard?tab=services'])
                 );
 
                 // Notify admins

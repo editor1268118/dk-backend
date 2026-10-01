@@ -33,7 +33,7 @@ class VendorMatchingService
             $booking->update(['status' => ServiceBooking::STATUS_BROADCASTED]);
         } else {
             // No vendors available
-            $booking->update(['status' => ServiceBooking::STATUS_NO_VENDOR_AVAILABLE]);
+            $booking->update(['status' => ServiceBooking::STATUS_BROADCASTED]);
         }
 
         return [
@@ -171,11 +171,15 @@ class VendorMatchingService
 
         foreach ($providerIds as $providerId) {
             // Prevent duplicate offers (upsert-safe)
-            $exists = BookingVendorOffer::where('booking_id', $booking->id)
+            $existing = BookingVendorOffer::where('booking_id', $booking->id)
                 ->where('provider_user_id', $providerId)
-                ->exists();
+                ->first();
 
-            if (!$exists) {
+            if ($existing && $existing->status === BookingVendorOffer::STATUS_EXPIRED) {
+                $existing->update(['status' => BookingVendorOffer::STATUS_SENT, 'sent_at' => $now, 'expired_at' => null]);
+                $offersCreated++;
+                $notifiedProviderIds[] = $providerId;
+            } elseif (!$existing) {
                 BookingVendorOffer::create([
                     'booking_id' => $booking->id,
                     'provider_user_id' => $providerId,
@@ -201,7 +205,7 @@ class VendorMatchingService
                         [
                             'entity_type' => 'service_booking',
                             'entity_id'   => $booking->id,
-                            'action_url'  => '/dashboard?tab=job-offers',
+                            'action_url'  => '/dashboard?tab=job_offers',
                             'data'        => ['booking_reference' => $booking->booking_reference, 'service_name' => $serviceName],
                         ]
                     );
